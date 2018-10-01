@@ -5,6 +5,7 @@ name = "pypi"
 
 [dev-packages]
 pytest = "*"
+pytest-mock = "*"
 
 [packages]
 "boto3" = "==1.9.14"
