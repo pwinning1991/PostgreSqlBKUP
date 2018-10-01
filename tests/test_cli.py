@@ -3,31 +3,41 @@ import pytest
 from pgbackup import cli
 
 url = "postgres://bob:password@example.com:5432/db_one"
+@pytest.fixture()
+def parser():
+     return cli.create_parser()
 
-def test_parser_without_driver():
+def test_parser_without_driver(parser):
     """
     Without a soeciifed driver the parser will exit
     """
-    parser = cli.create_parser()
     with pytest.raises(SystemExit):
         parser.parse_args([url])
 
 
-def test_parser_with_driver():
+def test_parser_with_driver(parser):
     """
     the parser will exit if it receives a driver withou a destination
     """
-    parser = cli.create_parser()
     with pytest.raises(SystemExit):
         parser.parse_args([url, '--driver', 'local'])
 
-def test_parser_with_driver_and_destination():
+def test_parser_with_driver_and_destination(parser):
     """
     The parser will not exit if it recieves a driver and a destination
     """
-    parser = cli.create_parser()
     args = parser.parse_args([url, '--driver', 'local', '/some/path/'])
 
     assert args.driver == 'local'
-    assert args.path == '/some/path'
+    assert args.destination == '/some/path'
 
+def test_parser_with_unknown_driver(parser):
+    """
+    the parser will exit if the dirver name is unknown
+    """
+    with pytest.raises(SystemExit):
+        parser.parse_args([url, '--driver', 'azure', 'destination'])
+
+def test_parser_parser_with_known_driver(parser):
+    for driver in ['local','s3']:
+        assert parser.parse_args([url, 'driver', driver, 'destination'])
